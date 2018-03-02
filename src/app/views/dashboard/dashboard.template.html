@@ -1,0 +1,625 @@
+<style>
+.agm-map-a {
+  height: 175px;
+}
+.agm-map-b {
+  height: 400px;
+}
+</style>
+
+<!-- Dashboard card row --
+  <div *ngIf="projectCheck; then showProjects else newUser">
+  </div-->
+
+
+<!--div *ngIf="userProjects | async"-->
+  <div fxLayout="row" fxLayoutWrap="wrap">
+    <div *ngFor="let t of userProjects$ | async" fxLayout="column" fxFlex="100" fxFlex.gt-xs="33">
+      <mat-card class="p-0">
+        <mat-card-title routerLink="/projects/{{t.id}}/overview" class="mat-bg-primary m-0">
+          <div class="card-title-text">
+            <span>{{t.label || t.ref_name}}</span>
+            <span fxFlex></span>
+            <button class="card-control" mat-icon-button [matMenuTriggerFor]="menu1">
+              <mat-icon>more_vert</mat-icon>
+            </button>
+            <mat-menu #menu1="matMenu">
+              <button mat-menu-item>
+                <mat-icon>edit</mat-icon>
+                <span>Rename</span>
+              </button>
+              <button mat-menu-item>
+                <mat-icon>notifications_off</mat-icon>
+                <span>Disable alerts</span>
+              </button>
+              <button mat-menu-item>
+                  <mat-icon>close</mat-icon>
+                  <span>Remove panel</span>
+              </button>
+            </mat-menu>
+          </div>
+          <mat-divider></mat-divider>
+        </mat-card-title>
+
+          <agm-map class="agm-map-a" [latitude]="t.geo.latitude" [longitude]="t.geo.longitude" [zoom]="zoom" [disableDefaultUI]="true" [mapTypeId]="'hybrid'">
+            <!--agm-marker [latitude]="latitude" [longitude]="longitude"></agm-marker-->
+            <agm-circle
+            [latitude]="t.geo.latitude"
+            [longitude]="t.geo.longitude"
+            [radius]="circleMapRadius"
+            [circleDraggable]="false"
+            [editable]="false"
+            [strokeColor]="'#000'"
+            [strokeWeight]="'3px'">
+            </agm-circle>
+          </agm-map>
+        <!--img mat-card-image src="assets/images/marsh-01.png"-->
+        <mat-card-content>
+          <!--div class="mb-1" (mouseenter)="mouseEnter('timeline', t.uid)"-->
+          <div class="mb-1">
+           <p class="mb-03 mt-05 text-muted"> {{t.progress}}% towards delivery</p>
+           <mat-progress-bar
+           class=""
+           color="accent"
+           mode="determinate"
+           [value]="t.progress">
+           </mat-progress-bar>
+          </div>
+          <!--div class="project-details" (mouseenter)="mouseEnter('event', t.uid)"-->
+          <div class="project-details">
+            <p><mat-icon class="text-muted">flight_takeoff</mat-icon> Takeoff: {{t.date | date:'short'}}</p>
+            <p><mat-icon class="text-muted">location_on</mat-icon>{{t.searchControl}}</p>
+          </div>
+
+          <mat-divider class="mb-1"></mat-divider>
+          <button mat-icon-button><mat-icon class="text-muted">assignment</mat-icon></button>
+          <button mat-icon-button><mat-icon class="text-muted">share</mat-icon></button>
+          <mat-chip-list>
+            <mat-chip *ngIf="t.stage == 'awaiting_approval'"color="accent" selected="true">Awaiting <b class="mr-02 ml-02">Osprey</b> Approval</mat-chip>
+            <mat-chip *ngIf="t.stage == 'planning'"color="primary" selected="true">Planning</mat-chip>
+            <mat-chip *ngIf="t.stage == 'flight'" color="primary" selected="true">Flight day</mat-chip>
+          </mat-chip-list>
+        </mat-card-content>
+      </mat-card>
+    </div>
+
+  <div *ngIf="this.hoverTimeline" fxLayout="column" fxFlex="100" fxFlex.gt-xs="33">
+      <!-- Time line -->
+      <mat-card class="default">
+        <mat-card-title>Timeline</mat-card-title>
+        <mat-card-content>
+          <div class="timeline">
+            <div class="timeline-item"  *ngFor="let tl of this.hoverTimeline | async">
+
+              <!-- EVENT TYPE == AERIAL CINEMA !!! EVENTS WHERE THE OBJ IS TO COMPLETE AERIAL FILMING TO CLIENT SPEC -->
+              <div *ngIf="tl.type == 'aerial_cinema'">
+              <div class="timeline-badge">
+                <img src="assets/images/face-6.jpg" alt="">
+              </div>
+              <div class="timeline-body">
+                <div class="timeline-body-top" fxLayout="row">
+                  <a href="#" class="timeline-body-title mr-1"><b>{{tl.ref_name}}</b> {{tl.lore}}</a>
+                  <span class="text-muted">{{tl.from | amTimeAgo }}</span>
+                  <span fxFlex></span>
+                </div>
+                <div class="timeline-body-content">
+                  <p>{{tl.tl_lore}}</p>
+                </div>
+                <div class="timeline-body-actions">
+                  <a href="#" class="mr-1 text-muted">Like</a>
+                  <a href="#" class="text-muted">Comment</a>
+                </div>
+              </div>
+            </div>
+
+            <!-- EVENT TYPE == DELIVERY !!! EVENTS WHERE THE OBJ IS TO DELIVER THE CLIENTS RENDERS -->
+              <div *ngIf="tl.type == 'delivery'">
+              <div class="timeline-badge">
+                <img src="assets/images/face-6.jpg" alt="">
+              </div>
+              <div class="timeline-body">
+                <div class="timeline-body-top" fxLayout="row">
+                  <a href="#" class="timeline-body-title mr-1"><b>{{tl.ref_name}}</b> {{tl.lore}}</a>
+                  <span class="text-muted">{{tl.from | amTimeAgo }}</span>
+                  <span fxFlex></span>
+                </div>
+                <div class="timeline-body-content">
+                  <p>{{tl.tl_lore}}</p>
+                </div>
+                <div class="timeline-body-actions">
+                  <a href="#" class="mr-1 text-muted">Like</a>
+                  <a href="#" class="text-muted">Comment</a>
+                </div>
+              </div>
+            </div>
+
+              <!-- EVENT TYPE == DELIVERY !!! EVENTS WHICH ARE DELAYED DUE TO INCLIMENT WEATHER -->
+              <div *ngIf="tl.type == 'aerial_cinema_delayed_weather'">
+              <div class="timeline-badge">
+                <img src="assets/images/face-6.jpg" alt="">
+              </div>
+              <div class="timeline-body">
+                <div class="timeline-body-top" fxLayout="row">
+                  <a href="#" class="timeline-body-title mr-1"><b>{{tl.ref_name}}</b> {{tl.lore}}</a>
+                  <span class="text-muted">{{tl.from | amTimeAgo }}</span>
+                  <span fxFlex></span>
+                </div>
+                <div class="timeline-body-content">
+                  <p>{{tl.tl_lore}}</p>
+                </div>
+                <div class="timeline-body-actions">
+                  <a href="#" class="mr-1 text-muted">Like</a>
+                  <a href="#" class="text-muted">Comment</a>
+                </div>
+              </div>
+            </div>
+          </div>
+
+
+            <!--div class="timeline-item">
+              <div class="timeline-badge">
+                <mat-icon class="icon-badge mat-bg-warn">settings</mat-icon>
+              </div>
+              <div class="timeline-body">
+                <div class="timeline-body-top" fxLayout="row">
+                  <a href="#" class="timeline-body-title mr-1"><b>{{tl.ref_name}}</b></a>
+                  <span class="text-muted">5 days ago</span>
+                  <span fxFlex></span>
+                </div>
+                <div class="timeline-body-content">
+                  <p>Membership has been upgraded to pro</p>
+                </div>
+                <div class="timeline-body-actions">
+                  <a href="#" class="mr-1 text-muted">Like</a>
+                  <a href="#" class="text-muted">Comment</a>
+                </div>
+              </div>
+            </div-->
+          </div>
+        </mat-card-content>
+      </mat-card>
+      <!-- End Time line -->
+    </div>
+  </div>
+<!--/div-->
+
+
+  <!--ng-template [ngIf]="this.projectCheck"-->
+  <div fxLayout="row" fxLayoutWrap="wrap">
+<div fxLayout="column" fxFlex="100" fxFlex.gt-xs="100">
+  <!--mat-card class="p-0">
+    <mat-card-title class="mat-bg-primary m-0">
+      <div class="card-title-text">
+        <span>It looks like you haven't started a project yet</span>
+        <span fxFlex></span>
+        <mat-menu #menu1="matMenu">
+          <button mat-menu-item>
+            <mat-icon>settings</mat-icon>
+            <span>Settings</span>
+          </button>
+          <button mat-menu-item>
+              <mat-icon>close</mat-icon>
+              <span>Remove panel</span>
+          </button>
+        </mat-menu>
+      </div>
+      <mat-divider></mat-divider>
+    </mat-card-title>
+    <img mat-card-image src="assets/images/finish-order.png">
+    <mat-divider class="mb-1"></mat-divider>
+    <mat-card-content>
+      <div class="project-details">
+        <p><mat-icon class="text-muted">date_range</mat-icon> Date time input...</p>
+        <p><mat-icon class="text-muted">location_on</mat-icon>Location input..</p>
+      </div>
+
+      <button mat-icon-button><mat-icon class="text-muted">assignment</mat-icon></button>
+      <button mat-icon-button><mat-icon class="text-muted">share</mat-icon></button>
+    </mat-card-content>
+  </mat-card-->
+
+  <mat-card class="p-0" *ngIf="this.newProject$ | async as np" >
+    <mat-card-title class="">
+      <div class="card-title-text" id="d_i_stepOne">Start your order here</div>
+      <mat-divider></mat-divider>
+    </mat-card-title>
+    <mat-card-content>
+      <mat-horizontal-stepper [linear]="true">
+        <mat-step [stepControl]="firstFormGroup">
+          <form [formGroup]="firstFormGroup">
+            <ng-template matStepLabel>Project Details</ng-template>
+              <div fxLayout="row" fxLayoutWrap="wrap">
+                <div fxFlex.gt-xs="50" class="pr-1">
+                  <mat-form-field class="full-width mt-1">
+                    <input matInput placeholder="Project Label" type="text" [value]="np.label  || ''"
+                      class="form-control" formControlName="label">
+                  </mat-form-field>
+                  <Label>Service *</Label>
+                  <mat-select id="langToggle" placeholder="Tap to select" [value]="np.serviceSelect" selectionChange="selectorChange($event)" formControlName="serviceSelect" class="mb-1">
+                    <mat-option *ngFor="let service of this.services | async" [value]="service.ref_name" ngDefaultControl>
+                      {{service.ref_name}}
+                    </mat-option>
+                  </mat-select>
+
+                  <div class="pb-1">
+                      <mat-form-field class="full-width">
+                          <input
+                          matInput
+                          name="date"
+                          formControlName="date"
+                          placeholder="Date"
+                          [matDatepicker]="appDatepicker">
+
+                          <mat-datepicker-toggle matSuffix [for]="appDatepicker"></mat-datepicker-toggle>
+                      </mat-form-field>
+                      <mat-datepicker #appDatepicker></mat-datepicker>
+                      <p id="areaTwo" class="text-muted">Need more than 1 day?</p>
+                  </div>
+
+                  <mat-divider class="mb-1"></mat-divider>
+                  <mat-list *ngIf="this.firstFormGroup.value.serviceSelect == 'Videography'">
+                    <h3 matSubheader>As Standard with Videography</h3>
+                    <mat-list-item>As many shots as you need within the timeslot</mat-list-item>
+                    <mat-list-item>We work to your specifications</mat-list-item>
+                    <mat-list-item>Up to 5.2K30 or 4K60 footage</mat-list-item>
+                    <mat-list-item>1 pilot and 1 camera operator</mat-list-item>
+                    <mat-list-item>Basic color grading and cuts (Optional)</mat-list-item>
+                  </mat-list>
+
+                  <mat-list *ngIf="this.firstFormGroup.value.serviceSelect == 'Real Estate'">
+                    <h3 matSubheader>As Standard with Real Estate:</h3>
+                    <mat-list-item>Every shot you need, interior or exterior</mat-list-item>
+                    <mat-list-item>Up to 30 seconds of surrounding area footage</mat-list-item>
+                    <mat-list-item>1 pilot and 1 camera operator</mat-list-item>
+                  </mat-list>
+
+                  <mat-list *ngIf="this.firstFormGroup.value.serviceSelect == ''">
+                    <h3 matSubheader>As Standard with Osprey UAV</h3>
+                    <mat-list-item><mat-icon class="mr-1">group</mat-icon>A two person crew; 1 pilot and 1 camera operator</mat-list-item>
+                    <mat-list-item><mat-icon class="mr-1">camera</mat-icon>5.2K Micro 4/3 X5S Camera</mat-list-item>
+                    <mat-list-item><mat-icon class="mr-1">cloud_upload</mat-icon>Files delivered via the dashboard</mat-list-item>
+                  </mat-list>
+
+                </div>
+                <div fxFlex="100" fxFlex.gt-xs="50">
+                  <div *ngFor="let f of this.newProjectFlights$ | async">
+                  <mat-form-field class="full-width mt-1">
+                    <input matInput placeholder="Take off/landing site" autocorrect="on"
+                    autocapitalize="on" spellcheck="on" type="text" [value]="(f.address)  || ''" class="autocomplete form-control" #search id="{{f.id}}" >
+                  </mat-form-field>
+                    <agm-map id="flight-map" class="agm-map-b mb-1" [latitude]="f.geo.latitude" [longitude]="f.geo.longitude" [zoom]="zoom" [mapTypeId]="'hybrid'">
+                      <!--agm-marker [latitude]="f.geo.latitude" [longitude]="f.geo.longitude"></agm-marker-->
+                      <agm-circle
+                      [latitude]="this.circleData[f.id].geo.latitude"
+                      [longitude]="this.circleData[f.id].geo.longitude"
+                      [radius]="circleMapRadius"
+                      [circleDraggable]="true"
+                      [editable]="true"
+                      [strokeColor]="'#000'"
+                      [strokeWeight]="'3px'"
+                      (radiusChange)="circleMapRadiusChange($event, f.id)"
+                      (centerChange)="circleMapCenterChange($event, f.id)">
+                      </agm-circle>
+                    </agm-map>
+                </div>
+                </div>
+                <div>
+              </div>
+            </div><mat-divider class="mb-1"></mat-divider>
+            <button mat-raised-button color="primary" (click)="stepOneNext()" matStepperNext>
+              Next</button>
+              <button mat-raised-button color="accent" class="ml-1" (click)="addFlight()"><mat-icon class="mr-1">add_location</mat-icon>
+                Add a Flight</button>
+          </form>
+        </mat-step>
+        <mat-step [stepControl]="secondFormGroup">
+          <form [formGroup]="secondFormGroup">
+            <ng-template matStepLabel>Deposit</ng-template>
+            <mat-form-field>
+              <input matInput placeholder="Address" formControlName="secondCtrl" required>
+            </mat-form-field>
+            <div>
+              <button mat-raised-button color="accent" matStepperPrevious>Back</button>
+              <button mat-raised-button color="primary" (click)="stepTwoNext()" matStepperNext>Next</button>
+            </div>
+          </form>
+        </mat-step>
+        <mat-step>
+          <ng-template matStepLabel>Done</ng-template>
+          <div>
+            <mat-icon class="pt-1" [style.fontSize]="'36px'">check</mat-icon>
+          </div>
+          <div class="pb-1 mb-1"> You Are Done.</div>
+          <div>
+            <button mat-raised-button color="accent" matStepperPrevious>Back</button>
+          </div>
+        </mat-step>
+      </mat-horizontal-stepper>
+    </mat-card-content>
+  </mat-card>
+</div>
+</div>
+<!--/ng-template-->
+<!-- Fullwidth chart --
+<div fxLayout="row" fxLayoutWrap="wrap">
+  <div fxFlex="100">
+    <mat-card class="default">
+      <mat-card-title class="">
+        <span>Orders</span>
+        <span fxFlex></span>
+      </mat-card-title>
+      <mat-card-subtitle>Orders vs New user registrations</mat-card-subtitle>
+      <mat-card-content class="p-0" [style.height]="'240px'">
+        <canvas
+          height="240"
+          baseChart
+          class="chart m-0"
+          [datasets]="lineChartSteppedData"
+          [labels]="lineChartLabels"
+          [options]="lineChartOptions"
+          [colors]="lineChartColors"
+          [legend]="lineChartLegend"
+          [chartType]="lineChartType"></canvas>
+      </mat-card-content>
+    </mat-card>
+  </div>
+</div-->
+
+
+<div *ngIf="otherDisplay" fxLayout="row" fxLayoutWrap="wrap">
+  <!-- Gallery and chart column -->
+  <div fxFlex="100" fxFlex.gt-sm="33.33" fxLayout="column">
+    <mat-card class="p-0">
+      <div fxLayout="row" fxLayoutWrap="wrap" class="doughnut-grid text-center">
+          <div fxFlex="50" class="doughnut-grid-item light-mat-gray">
+            <canvas
+            height="120"
+            baseChart
+            class="chart"
+            [data]="doughnutChartData1"
+            [options]="doughnutOptions"
+            [labels]="doughnutLabels"
+            [colors]="doughnutChartColors1"
+            [chartType]="doughnutChartType"></canvas>
+            <small>Space: {{data1}}/{{total1}} GB</small>
+        </div>
+        <div fxFlex="50" class="doughnut-grid-item">
+          <canvas
+            height="120"
+            baseChart
+            class="chart"
+            [data]="doughnutChartData2"
+            [options]="doughnutOptions"
+            [labels]="doughnutLabels"
+            [colors]="doughnutChartColors2"
+            [chartType]="doughnutChartType"></canvas>
+            <small>Tasks: 8/12</small>
+      </div>
+      <div fxFlex="50" class="doughnut-grid-item">
+        <canvas
+          height="120"
+          baseChart
+          class="chart"
+          [data]="doughnutChartData1"
+          [options]="doughnutOptions"
+          [labels]="doughnutLabels"
+          [colors]="doughnutChartColors2"
+          [chartType]="doughnutChartType"></canvas>
+          <small>Tickets: 15/40</small>
+      </div>
+      <div fxFlex="50" class="doughnut-grid-item light-mat-gray">
+        <canvas
+        height="120"
+        baseChart
+        class="chart"
+        [data]="doughnutChartData2"
+        [options]="doughnutOptions"
+        [labels]="doughnutLabels"
+        [colors]="doughnutChartColors1"
+        [chartType]="doughnutChartType"></canvas>
+        <small>Stock: 1600/2000</small>
+      </div>
+    </div>
+    </mat-card>
+
+    <mat-card class="p-0">
+      <mat-card-title class="">
+        <div class="card-title-text">
+          <span>Top Campaign Performance</span>
+          <span fxFlex></span>
+          <button class="card-control" mat-icon-button [matMenuTriggerFor]="menu2">
+            <mat-icon>more_vert</mat-icon>
+          </button>
+          <mat-menu #menu2="matMenu">
+            <button mat-menu-item>
+              <mat-icon>settings</mat-icon>
+              <span>Campaign Settings</span>
+            </button>
+            <button mat-menu-item>
+              <mat-icon>do_not_disturb</mat-icon>
+              <span>Disable All Campaigns</span>
+            </button>
+            <button mat-menu-item>
+              <mat-icon>close</mat-icon>
+              <span>Remove panel</span>
+            </button>
+          </mat-menu>
+        </div>
+        <mat-divider></mat-divider>
+      </mat-card-title>
+      <mat-card-content>
+       <div class="mb-1">
+        <p class="mb-05 text-muted">Facebook Campaign</p>
+        <mat-progress-bar
+        class=""
+        color="primary"
+        mode="determinate"
+        [value]="90">
+        </mat-progress-bar>
+       </div>
+       <div class="mb-1">
+        <p class="mb-05 text-muted">Google AdSense</p>
+        <mat-progress-bar
+        class=""
+        color="primary"
+        mode="determinate"
+        [value]="80">
+        </mat-progress-bar>
+       </div>
+       <div class="mb-1">
+        <p class="mb-05 text-muted">Twitter Campaign</p>
+        <mat-progress-bar
+        class=""
+        color="accent"
+        mode="determinate"
+        [value]="60">
+        </mat-progress-bar>
+       </div>
+       <div class="mb-1">
+        <p class="mb-05 text-muted">LinkedIn Campaign</p>
+        <mat-progress-bar
+        class=""
+        color="warn"
+        mode="determinate"
+        [value]="40">
+        </mat-progress-bar>
+       </div>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="default">
+      <mat-card-content class="p-0">
+        <mat-grid-list cols="3" rowHeight="1:1" class="app-gallery">
+          <!-- Gallery item -->
+          <mat-grid-tile *ngFor="let photo of photos">
+            <img [src]="photo.url" alt="">
+            <!-- item detail, show on hover -->
+            <div class="gallery-control-wrap">
+              <div class="gallery-control">
+                <h4 class="photo-detail fz-1" [fxHide.lt-sm]="true">{{photo.name}}</h4>
+                <span fxFlex></span>
+                <button mat-icon-button [matMenuTriggerFor]="photoMenu" class="">
+                  <mat-icon>more_vert</mat-icon>
+                </button>
+                <mat-menu #photoMenu="matMenu">
+                  <button mat-menu-item><mat-icon>send</mat-icon>Send as attachment</button>
+                  <button mat-menu-item><mat-icon>favorite</mat-icon>Favorite</button>
+                  <button mat-menu-item><mat-icon>delete</mat-icon>Delete</button>
+                </mat-menu>
+              </div>
+            </div>
+          </mat-grid-tile>
+        </mat-grid-list>
+      </mat-card-content>
+    </mat-card>
+  </div>
+
+  <!-- ticket and project table column -->
+  <div fxFlex="100" fxFlex.gt-sm="66.66" fxLayout="column" fxLayoutWrap="wrap">
+    <mat-card class="default">
+      <mat-card-title>Recent and Upcoming Projects</mat-card-title>
+      <mat-card-content class="p-0">
+        <mat-list class="compact-list mb-1">
+          <mat-list-item class="" *ngFor="let t of userProjects | async">
+              <mat-icon class="mr-1">{{ t.mat_icon }}</mat-icon>
+            <!--<img mat-list-avatar class="mr-1" [src]="t.img" alt="">-->
+            <div fxLayout="row" fxFlex="100">
+              <h6 class="m-0 mr-1">{{t.ref_name}}</h6>
+              <span fxFlex></span>
+              <small class="text-muted mr-1">{{ t.progress }}%</small>
+            </div>
+              <mat-progress-bar
+                class="mr-1"
+                color="primary"
+                mode="determinate"
+                [value]="t.progress">
+              </mat-progress-bar>
+              <span fxFlex></span>
+            <mat-chip class="mr-1" mat-sm-chip [color]="'warn'">{{t.stage}}</mat-chip>
+          </mat-list-item>
+        </mat-list>
+        <div class="text-center">
+          <button mat-button class="full-width">View all</button>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="p-0">
+      <mat-card-content class="p-0">
+        <ngx-datatable
+          class="material ml-0 mr-0"
+          [rows]="projects"
+          [columnMode]="'flex'"
+          [headerHeight]="50"
+          [footerHeight]="0"
+          [rowHeight]="'auto'">
+          <ngx-datatable-column name="Project" [flexGrow]="1">
+            <ng-template let-row="row" ngx-datatable-cell-template>
+              {{ row?.name }}
+            </ng-template>
+          </ngx-datatable-column>
+          <ngx-datatable-column name="Date" [flexGrow]="1">
+            <ng-template let-row="row" ngx-datatable-cell-template>
+              {{ row?.date }}
+            </ng-template>
+          </ngx-datatable-column>
+          <ngx-datatable-column name="Stage" [flexGrow]="1">
+            <ng-template let-row="row" ngx-datatable-cell-template>
+              {{ row?.stage }}
+            </ng-template>
+          </ngx-datatable-column>
+          <ngx-datatable-column name="Stage Progress" [flexGrow]="1">
+            <ng-template let-row="row" ngx-datatable-cell-template>
+              <mat-progress-bar
+                class=""
+                color="primary"
+                mode="determinate"
+                [value]="row.progress">
+              </mat-progress-bar>
+            </ng-template>
+          </ngx-datatable-column>
+        </ngx-datatable>
+        <div class="text-center">
+          <button mat-button class="full-width">View all</button>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Users Row -->
+    <div fxLayout="row" fxLayoutWrap="wrap" >
+      <div
+      *ngFor="let user of users"
+      fxFlex="100"
+      fxFlex.gt-sm="50">
+        <mat-card class="user-card p-0">
+          <mat-card-title class="mat-bg-primary">
+            <div class="card-title-text">
+              <a href="" class="toolbar-avatar md mr-1"><img [src]="user.photo" alt=""></a>
+              <span>{{user.name}}</span>
+              <span fxFlex></span>
+              <button mat-icon-button [matMenuTriggerFor]="userMenu" class="">
+                  <mat-icon class="">more_vert</mat-icon>
+              </button>
+              <mat-menu #userMenu="matMenu">
+                  <button mat-menu-item>Follow</button>
+                  <button mat-menu-item>Message</button>
+                  <button mat-menu-item>Block</button>
+                  <button mat-menu-item>Delete</button>
+              </mat-menu>
+            </div>
+            <mat-divider></mat-divider>
+          </mat-card-title>
+          <mat-card-content>
+            <!-- user detail lines-->
+            <div class="user-details">
+              <p><mat-icon class="text-muted">card_membership</mat-icon>{{user.membership}}</p>
+              <p><mat-icon class="text-muted">date_range</mat-icon>Member since {{user.registered | date}}</p>
+              <p><mat-icon class="text-muted">location_on</mat-icon>{{user.address}}</p>
+            </div>
+          </mat-card-content>
+        </mat-card>
+      </div>
+    </div>
+    <!-- End Users Row -->
+  </div>
+  <!-- End tables and users column -->

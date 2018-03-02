@@ -1,0 +1,98 @@
+<style>
+  .agm-map-a {
+    height: 400px;
+  }
+</style>
+<mat-card class="p-0">
+  <mat-tab-group (selectedTabChange)="loadMap($event)">
+    <mat-tab label="Project Details">
+      <mat-card-content class="mt-1">
+          <form>
+            <mat-form-field class="full-width">
+              <input
+              matInput
+              name="name"
+              placeholder="Name"
+              value="">
+            </mat-form-field>
+            <mat-form-field class="full-width">
+                <input
+                matInput
+                name="title"
+                placeholder="Title"
+                value="">
+              </mat-form-field>
+            <mat-form-field class="full-width">
+              <input
+              matInput
+              name="email"
+              placeholder="Email"
+              value="">
+            </mat-form-field>
+            <mat-form-field class="full-width">
+              <input
+              matInput
+              name="phone"
+              placeholder="Phone"
+              value="">
+            </mat-form-field>
+            <mat-form-field class="full-width">
+              <input
+              matInput
+              name="address"
+              placeholder="Adresss"
+              value="">
+            </mat-form-field>
+            <mat-form-field class="full-width">
+              <input
+              matInput
+              name="website"
+              placeholder="Website"
+              value="">
+            </mat-form-field>
+            <button mat-raised-button color="primary">Save</button>
+          </form>
+      </mat-card-content>
+    </mat-tab>
+    <div *ngFor="let f of this.currentProjectFlights$ | async">
+    <mat-tab label="Flight at {{f.name}}" id='{{f.id}}'>
+      <mat-card-content>
+        <mat-form-field class="full-width mt-1">
+        <input matInput placeholder="Take off/landing site" autocorrect="on" autocapitalize="on" spellcheck="on" type="text" [value]="(f.address)  || ''"
+          class="autocomplete form-control" #search id="{{f.id}}">
+      </mat-form-field>
+      <agm-map class="agm-map-a" (mapReady)="onMapReady($event)" id="map" [latitude]="f.geo.latitude" [longitude]="f.geo.longitude" [zoom]="zoom" [mapTypeId]="'hybrid'">
+        <!--agm-marker [latitude]="f.geo.latitude" [longitude]="f.geo.longitude"></agm-marker-->
+        <agm-circle [latitude]="this.circleData[f.id].geo.latitude" [longitude]="this.circleData[f.id].geo.longitude" [radius]="circleMapRadius"
+          [circleDraggable]="true" [editable]="true" [strokeColor]="'#000'" [strokeWeight]="'3px'" (radiusChange)="circleMapRadiusChange($event, f.id)"
+          (centerChange)="circleMapCenterChange($event, f.id)">
+        </agm-circle>
+      </agm-map>
+      </mat-card-content>
+    </mat-tab>
+  </div>
+    <mat-tab label="Privacy Settings">
+      <mat-card-content>
+        <div class="mb-1 mt-1">
+          <mat-checkbox> Get weekly news in your email.</mat-checkbox>
+        </div>
+        <div class="mb-1">
+          <mat-checkbox> Get notification when someone follows you.</mat-checkbox>
+        </div>
+        <div class="mb-1">
+          <mat-checkbox> Get email when someone follows you.</mat-checkbox>
+        </div>
+        <div class="mb-1">
+            <p>Choose your admin panel color schemes.</p>
+            <mat-radio-group fxLayout="column" fxLayoutGap="4px">
+              <mat-radio-button value="indigo">Indigo</mat-radio-button>
+              <mat-radio-button value="blue">Blue</mat-radio-button>
+              <mat-radio-button value="pink">Pink</mat-radio-button>
+              <mat-radio-button value="purple">Purple</mat-radio-button>
+            </mat-radio-group>
+        </div>
+        <button mat-raised-button color="primary">Save</button>
+      </mat-card-content>
+    </mat-tab>
+  </mat-tab-group>
+</mat-card>
